@@ -22,6 +22,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const serviceCollection = client.db("editNexus").collection("services");
+    const reviewCollection = client.db("editNexus").collection("reviews");
 
     // Jwt
     app.post("/jwt", (req, res) => {
@@ -51,6 +52,25 @@ async function run() {
     app.post("/services", async (req, res) => {
       const service = req.body;
       const result = await serviceCollection.insertOne(service);
+      res.send(result);
+    });
+
+    // reviews API
+    app.get("/reviews", async (req, res) => {
+      let query = {};
+      if (req.query.email) {
+        query = {
+          email: req.query.email,
+        };
+      }
+      const cursor = reviewCollection.find(query);
+      const reviews = await cursor.toArray();
+      res.send(reviews);
+    });
+
+    app.post("/reviews", async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
       res.send(result);
     });
   } finally {
